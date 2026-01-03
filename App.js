@@ -3,9 +3,13 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 export default function App() {
+
+  let message = 'No native module found';
+  if (globalThis.native && globalThis.native['example-native-module'] && !globalThis.native['example-native-module']._missing)
+    message = globalThis.native['example-native-module'].hello()
   return (
     <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
+      <Text>{message}</Text>
       <StatusBar style="auto" />
     </View>
   );
