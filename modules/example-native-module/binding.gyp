@@ -4,7 +4,7 @@
       "target_name": "example-native-module",
       "sources": [ "native/addon.cc" ],
       "include_dirs": [
-        "<!(node -p \"require('node-addon-api').include.replace(/^-I\\s*/,'').replace(/^\\\"|\\\"$/g,'')\")"
+        "<!(node ./scripts/node-addon-include.js)"
       ],
       "cflags!": [ "-fno-exceptions" ],
       "cflags_cc!": [ "-fno-exceptions" ],
