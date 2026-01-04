@@ -10,7 +10,6 @@
     "electron": "expo-electron start"
   },
   "dependencies": {
-    "electron": "^39.2.7",
     "example-native-module": "file:modules/example-native-module",
     "expo": "~54.0.30",
     "expo-electron": "github:bmatusiak/expo-electron",
