@@ -9,9 +9,12 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "electron": "expo-electron start",
+    "electron:prebuild": "expo-electron prebuild",
     "electron:pack": "expo-electron package",
     "electron:make:win": "expo-electron package --make squirrel",
-    "electron:make:linux": "expo-electron package --make zip,deb"
+    "electron:make:linux": "expo-electron package --make deb",
+    "electron:make:mac": "expo-electron package --make darwin",
+    "electron:make:zip": "expo-electron package --make zip"
   },
   "dependencies": {
     "example-native-module": "file:modules/example-native-module",
