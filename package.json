@@ -12,12 +12,13 @@
   "dependencies": {
     "example-native-module": "file:modules/example-native-module",
     "expo": "~54.0.30",
-    "expo-electron": "github:bmatusiak/expo-electron",
+    "expo-electron": "file:modules/expo-electron",
     "expo-status-bar": "~3.0.9",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.5",
-    "react-native-web": "^0.21.0"
+    "react-native-web": "^0.21.0",
+    "electron-squirrel-startup": "^1.0.1"
   },
   "private": true
 }

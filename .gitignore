@@ -40,4 +40,4 @@ ios
 electron
 package-lock.json
 
-
+modules/expo-electron

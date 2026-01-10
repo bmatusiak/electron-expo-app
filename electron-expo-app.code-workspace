@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": ".",
+			"name": "main-workspace"
+		},
+		{
+			"path": "./modules/expo-electron",
+			"name": "expo-electron"
+		}
+	],
+	"settings": {}
+}
