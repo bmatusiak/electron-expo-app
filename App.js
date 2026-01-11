@@ -5,8 +5,8 @@ import { StyleSheet, Text, View } from 'react-native';
 export default function App() {
 
   let message = 'No native module found';
-  if (globalThis.native && globalThis.native['example-native-module'] && !globalThis.native['example-native-module']._missing)
-    message = globalThis.native['example-native-module'].hello()
+  if (globalThis.ElectronNative && globalThis.ElectronNative['example-native-module'] && !globalThis.ElectronNative['example-native-module']._missing)
+    message = globalThis.ElectronNative['example-native-module'].hello()
   return (
     <View style={styles.container}>
       <Text>{message}</Text>
