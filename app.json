@@ -3,6 +3,9 @@
     "name": "electron-expo-app",
     "slug": "electron-expo-app",
     "version": "1.0.0",
-    "scheme": "electronexpoapp"
+    "scheme": "electronexpoapp",
+    "android": {
+      "package": "com.bmatusiak.electronexpoapp"
+    }
   }
 }
