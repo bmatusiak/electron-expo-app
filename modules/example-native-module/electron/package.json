@@ -3,13 +3,8 @@
   "version": "0.0.1",
   "main": "index.js",
   "description": "Example native module for expo-electron autolinker demo",
-  "private": true,
-  "dependencies": {
-    "node-addon-api": "^5.0.0"    
-  },
-  "peerDependencies": {
-    "expo": "*",
-    "react": "*",
-    "react-native": "*"
+  "gypfile": true,
+  "scripts": {
+    "build": "node-gyp rebuild"
   }
 }

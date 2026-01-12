@@ -1,9 +1,9 @@
 const path = require('path');
 let native = null;
 try {
-    native = require(path.join(__dirname, '..', 'build', 'Release', 'example-native-module.node'));
+    native = require(path.join(__dirname, 'build', 'Release', 'example-native-module.node'));
 } catch (e) {
-    try { native = require(path.join(__dirname, '..', 'build', 'Debug', 'example-native-module.node')); } catch (e2) { native = null; }
+    try { native = require(path.join(__dirname, 'build', 'Debug', 'example-native-module.node')); } catch (e2) { native = null; }
 }
 
 module.exports = {
