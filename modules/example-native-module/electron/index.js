@@ -7,6 +7,12 @@ try {
 }
 
 module.exports = {
+    PI: Math.PI,
     multiply: (a, b) => (native && typeof native.multiply === 'function' ? native.multiply(a, b) : a * b),
-    hello: () => (native && typeof native.hello === 'function' ? native.hello() : 'Hello From JS')
+    hello: () => (native && typeof native.hello === 'function' ? native.hello() : 'Hello From JS'),
+    setValueAsync: async (_value) => {
+        // Electron renderer uses the web implementation (NativeModule) to emit events.
+        // This exists to keep the Electron native API shape aligned with iOS/Android.
+        return;
+    },
 };

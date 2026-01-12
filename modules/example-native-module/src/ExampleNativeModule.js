@@ -8,6 +8,7 @@ import { requireNativeModule } from 'expo';
  * @typedef {import('expo').NativeModule<ExampleNativeModuleEvents> & {
  *   PI: number;
  *   hello(): string;
+ *   multiply(a: number, b: number): number;
  *   setValueAsync(value: string): Promise<void>;
  * }} ExampleNativeModule
  */

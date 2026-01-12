@@ -11,6 +11,13 @@
  *   onLoad: (event: { nativeEvent: OnLoadEventPayload }) => void;
  *   style?: import('react-native').StyleProp<import('react-native').ViewStyle>;
  * }} ExampleNativeModuleViewProps
+ *
+ * @typedef {{
+ *   PI: number;
+ *   hello: () => string;
+ *   multiply: (a: number, b: number) => number;
+ *   setValueAsync: (value: string) => Promise<void>;
+ * }} ExampleNativeModuleApi
  */
 
 export { };

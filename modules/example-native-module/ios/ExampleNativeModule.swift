@@ -20,7 +20,12 @@ public class ExampleNativeModule: Module {
 
     // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
     Function("hello") {
-      return "Hello world! 👋"
+      return "Hello From Native!!"
+    }
+
+    // Align with the Electron native addon API.
+    Function("multiply") { (a: Double, b: Double) in
+      return a * b
     }
 
     // Defines a JavaScript function that always returns a Promise and whose native code
