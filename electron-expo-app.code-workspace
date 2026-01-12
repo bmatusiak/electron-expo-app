@@ -5,7 +5,7 @@
 			"name": "main-workspace"
 		},
 		{
-			"path": "./modules/expo-electron",
+			"path": "modules/expo-electron",
 			"name": "expo-electron"
 		}
 	],
