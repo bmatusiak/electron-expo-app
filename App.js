@@ -15,7 +15,7 @@ export default function App() {
 
   const [setValueInput, setSetValueInput] = useState('abc');
 
-  const [viewUrl, setViewUrl] = useState('https://www.google.com');
+  const [viewUrl, setViewUrl] = useState('https://example.com');
   const [viewLoadedUrl, setViewLoadedUrl] = useState(null);
 
   const log = useCallback((line) => {
