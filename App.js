@@ -2,6 +2,10 @@ import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
+globalThis.electron.onDeepLink((url) => {
+  console.log('Received deep link URL:', url);
+});
+
 export default function App() {
 
   let message = 'No native module found';

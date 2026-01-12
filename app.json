@@ -2,6 +2,7 @@
   "expo": {
     "name": "electron-expo-app",
     "slug": "electron-expo-app",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "scheme": "electronexpoapp"
   }
 }
