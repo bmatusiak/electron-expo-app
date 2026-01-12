@@ -1,17 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import * as ExpoElectron from 'expo-electron';
 
 export default function App() {
-  const electron = useMemo(() => {
-    try {
-      if (typeof window !== 'undefined' && window.electron) return window.electron;
-      if (globalThis.electron) return globalThis.electron;
-    } catch (e) {
-      // ignore
-    }
-    return null;
-  }, []);
+  const electron = useMemo(() => ExpoElectron.getElectronBridge(), []);
+  const desktop = useMemo(() => ExpoElectron.createDesktopApi(electron), [electron]);
 
   const [lastDeepLink, setLastDeepLink] = useState(null);
   const [themeInfo, setThemeInfo] = useState(null);
@@ -28,13 +22,8 @@ export default function App() {
 
   const nativeHello = useMemo(() => {
     try {
-      if (
-        globalThis.ElectronNative &&
-        globalThis.ElectronNative['example-native-module'] &&
-        !globalThis.ElectronNative['example-native-module']._missing
-      ) {
-        return globalThis.ElectronNative['example-native-module'].hello();
-      }
+      const mod = ExpoElectron.requireNativeModule('example-native-module');
+      if (mod && typeof mod.hello === 'function') return mod.hello();
     } catch (e) {
       // ignore
     }
@@ -109,54 +98,72 @@ export default function App() {
     };
   }, [electron]);
 
-  const isElectron = !!(electron && typeof electron.invoke === 'function');
+  const isElectron = useMemo(() => ExpoElectron.isElectron(), []);
 
   async function openFileDialog() {
-    if (!electron?.openFileDialog) return log('openFileDialog not available');
-    const res = await electron.openFileDialog({
-      title: 'Pick a file',
-      properties: ['openFile'],
-    });
-    setLastDialogJson(JSON.stringify(res, null, 2));
-    const fp = res && Array.isArray(res.filePaths) && res.filePaths[0];
-    if (fp) setSelectedFilePath(fp);
-    log('open dialog: ' + JSON.stringify(res));
+    try {
+      const res = await desktop.openFileDialog({
+        title: 'Pick a file',
+        properties: ['openFile'],
+      });
+      setLastDialogJson(JSON.stringify(res, null, 2));
+      const fp = res && Array.isArray(res.filePaths) && res.filePaths[0];
+      if (fp) setSelectedFilePath(fp);
+      log('open dialog: ' + JSON.stringify(res));
+    } catch (e) {
+      log('openFileDialog failed: ' + (e && e.message));
+    }
   }
 
   async function saveFileDialog() {
-    if (!electron?.saveFileDialog) return log('saveFileDialog not available');
-    const res = await electron.saveFileDialog({
-      title: 'Save a file',
-      defaultPath: selectedFilePath || undefined,
-    });
-    setLastDialogJson(JSON.stringify(res, null, 2));
-    log('save dialog: ' + JSON.stringify(res));
+    try {
+      const res = await desktop.saveFileDialog({
+        title: 'Save a file',
+        defaultPath: selectedFilePath || undefined,
+      });
+      setLastDialogJson(JSON.stringify(res, null, 2));
+      log('save dialog: ' + JSON.stringify(res));
+    } catch (e) {
+      log('saveFileDialog failed: ' + (e && e.message));
+    }
   }
 
   async function readClipboard() {
-    if (!electron?.readClipboardText) return log('readClipboardText not available');
-    const t = await electron.readClipboardText();
-    setClipboardText(String(t || ''));
-    log('clipboard read');
+    try {
+      const t = await desktop.readClipboardText();
+      setClipboardText(String(t || ''));
+      log('clipboard read');
+    } catch (e) {
+      log('readClipboardText failed: ' + (e && e.message));
+    }
   }
 
   async function writeClipboard() {
-    if (!electron?.writeClipboardText) return log('writeClipboardText not available');
-    await electron.writeClipboardText(clipboardText);
-    log('clipboard written');
+    try {
+      await desktop.writeClipboardText(clipboardText);
+      log('clipboard written');
+    } catch (e) {
+      log('writeClipboardText failed: ' + (e && e.message));
+    }
   }
 
   async function openExternal() {
-    if (!electron?.openExternal) return log('openExternal not available');
-    const ok = await electron.openExternal('https://expo.dev');
-    log('openExternal result: ' + String(ok));
+    try {
+      const ok = await desktop.openExternal('https://expo.dev');
+      log('openExternal result: ' + String(ok));
+    } catch (e) {
+      log('openExternal failed: ' + (e && e.message));
+    }
   }
 
   async function showInFolder() {
-    if (!electron?.showItemInFolder) return log('showItemInFolder not available');
     if (!selectedFilePath) return log('no selected file path');
-    const ok = await electron.showItemInFolder(selectedFilePath);
-    log('showItemInFolder result: ' + String(ok));
+    try {
+      const ok = await desktop.showItemInFolder(selectedFilePath);
+      log('showItemInFolder result: ' + String(ok));
+    } catch (e) {
+      log('showItemInFolder failed: ' + (e && e.message));
+    }
   }
 
   return (
