@@ -1,168 +1,95 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
-import * as ExpoElectron from 'expo-electron';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import ExampleNativeModule, { ExampleNativeModuleView } from 'example-native-module';
 
 export default function App() {
-  const electron = useMemo(() => ExpoElectron.getElectronBridge(), []);
-  const desktop = useMemo(() => ExpoElectron.createDesktopApi(electron), [electron]);
-
-  const [lastDeepLink, setLastDeepLink] = useState(null);
-  const [themeInfo, setThemeInfo] = useState(null);
-  const [powerEvents, setPowerEvents] = useState([]);
-  const [userDataPath, setUserDataPath] = useState(null);
-  const [clipboardText, setClipboardText] = useState('Hello from Electron + Expo');
-  const [selectedFilePath, setSelectedFilePath] = useState(null);
-  const [lastDialogJson, setLastDialogJson] = useState(null);
   const [logLines, setLogLines] = useState([]);
+  const [lastChangeValue, setLastChangeValue] = useState(null);
 
-  function log(line) {
+  const [helloValue, setHelloValue] = useState(null);
+
+  const [mulA, setMulA] = useState('2');
+  const [mulB, setMulB] = useState('5');
+  const [mulResult, setMulResult] = useState(null);
+
+  const [setValueInput, setSetValueInput] = useState('abc');
+
+  const [viewUrl, setViewUrl] = useState('https://www.google.com');
+  const [viewLoadedUrl, setViewLoadedUrl] = useState(null);
+
+  const log = useCallback((line) => {
     setLogLines((prev) => [String(line), ...prev].slice(0, 30));
-  }
+  }, []);
 
-  const nativeHello = useMemo(() => {
+  const pi = useMemo(() => {
     try {
-      const mod = ExpoElectron.requireNativeModule('example-native-module');
-      if (mod && typeof mod.hello === 'function') return mod.hello();
+      return ExampleNativeModule.PI;
     } catch (e) {
-      // ignore
+      return null;
     }
-    return 'No native module found';
+  }, []);
+
+  const hasElectronNativeImpl = useMemo(() => {
+    try {
+      const root = (typeof globalThis !== 'undefined' && globalThis) ? globalThis : null;
+      const impl = root && root.ElectronNative && root.ElectronNative['example-native-module'];
+      return Boolean(impl && !impl._missing);
+    } catch (e) {
+      return false;
+    }
   }, []);
 
   useEffect(() => {
-    if (!electron) return;
-
-    let unsubDeepLink = null;
-    let unsubTheme = null;
-    let unsubPower = null;
-
-    try {
-      if (typeof electron.onDeepLink === 'function') {
-        unsubDeepLink = electron.onDeepLink((url) => {
-          setLastDeepLink(String(url || ''));
-          log('deep link: ' + String(url || ''));
-        });
-      }
-    } catch (e) {
-      log('onDeepLink failed: ' + (e && e.message));
+    const addListener = ExampleNativeModule && ExampleNativeModule.addListener;
+    if (typeof addListener !== 'function') {
+      log('ExampleNativeModule.addListener not available');
+      return;
     }
 
-    try {
-      if (typeof electron.onThemeChanged === 'function') {
-        unsubTheme = electron.onThemeChanged((payload) => {
-          setThemeInfo(payload);
-          log('theme updated: ' + JSON.stringify(payload));
-        });
-      }
-    } catch (e) {
-      log('onThemeChanged failed: ' + (e && e.message));
-    }
-
-    try {
-      if (typeof electron.onPowerEvent === 'function') {
-        unsubPower = electron.onPowerEvent((payload) => {
-          setPowerEvents((prev) => [payload, ...prev].slice(0, 20));
-          log('power event: ' + JSON.stringify(payload));
-        });
-      }
-    } catch (e) {
-      log('onPowerEvent failed: ' + (e && e.message));
-    }
-
-    (async () => {
-      try {
-        if (typeof electron.getTheme === 'function') {
-          const t = await electron.getTheme();
-          setThemeInfo(t);
-          log('theme: ' + JSON.stringify(t));
-        }
-        if (typeof electron.getPath === 'function') {
-          const p = await electron.getPath('userData');
-          setUserDataPath(p);
-          log('userData path: ' + String(p));
-        }
-      } catch (e) {
-        log('init failed: ' + (e && e.message));
-      }
-    })();
+    const sub = addListener.call(ExampleNativeModule, 'onChange', (event) => {
+      const value = event && typeof event.value !== 'undefined' ? String(event.value) : JSON.stringify(event);
+      setLastChangeValue(value);
+      log('onChange: ' + value);
+    });
 
     return () => {
       try {
-        if (typeof unsubDeepLink === 'function') unsubDeepLink();
-        if (typeof unsubTheme === 'function') unsubTheme();
-        if (typeof unsubPower === 'function') unsubPower();
+        if (sub && typeof sub.remove === 'function') sub.remove();
       } catch (e) {
         // ignore
       }
     };
-  }, [electron]);
+  }, [log]);
 
-  const isElectron = useMemo(() => ExpoElectron.isElectron(), []);
-
-  async function openFileDialog() {
+  function runHello() {
     try {
-      const res = await desktop.openFileDialog({
-        title: 'Pick a file',
-        properties: ['openFile'],
-      });
-      setLastDialogJson(JSON.stringify(res, null, 2));
-      const fp = res && Array.isArray(res.filePaths) && res.filePaths[0];
-      if (fp) setSelectedFilePath(fp);
-      log('open dialog: ' + JSON.stringify(res));
+      const v = ExampleNativeModule.hello();
+      setHelloValue(String(v));
+      log('hello() ok');
     } catch (e) {
-      log('openFileDialog failed: ' + (e && e.message));
+      log('hello() failed: ' + (e && e.message));
     }
   }
 
-  async function saveFileDialog() {
+  function runMultiply() {
     try {
-      const res = await desktop.saveFileDialog({
-        title: 'Save a file',
-        defaultPath: selectedFilePath || undefined,
-      });
-      setLastDialogJson(JSON.stringify(res, null, 2));
-      log('save dialog: ' + JSON.stringify(res));
+      const a = Number(mulA);
+      const b = Number(mulB);
+      const r = ExampleNativeModule.multiply(a, b);
+      setMulResult(String(r));
+      log('multiply() ok');
     } catch (e) {
-      log('saveFileDialog failed: ' + (e && e.message));
+      log('multiply() failed: ' + (e && e.message));
     }
   }
 
-  async function readClipboard() {
+  async function runSetValueAsync() {
     try {
-      const t = await desktop.readClipboardText();
-      setClipboardText(String(t || ''));
-      log('clipboard read');
+      await ExampleNativeModule.setValueAsync(String(setValueInput));
+      log('setValueAsync() resolved');
     } catch (e) {
-      log('readClipboardText failed: ' + (e && e.message));
-    }
-  }
-
-  async function writeClipboard() {
-    try {
-      await desktop.writeClipboardText(clipboardText);
-      log('clipboard written');
-    } catch (e) {
-      log('writeClipboardText failed: ' + (e && e.message));
-    }
-  }
-
-  async function openExternal() {
-    try {
-      const ok = await desktop.openExternal('https://expo.dev');
-      log('openExternal result: ' + String(ok));
-    } catch (e) {
-      log('openExternal failed: ' + (e && e.message));
-    }
-  }
-
-  async function showInFolder() {
-    if (!selectedFilePath) return log('no selected file path');
-    try {
-      const ok = await desktop.showItemInFolder(selectedFilePath);
-      log('showItemInFolder result: ' + String(ok));
-    } catch (e) {
-      log('showItemInFolder failed: ' + (e && e.message));
+      log('setValueAsync() failed: ' + (e && e.message));
     }
   }
 
@@ -170,65 +97,63 @@ export default function App() {
     <View style={styles.container}>
       <StatusBar style="auto" />
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>expo-electron demo</Text>
-        <Text style={styles.section}>Native module</Text>
-        <Text style={styles.mono}>{nativeHello}</Text>
+        <Text style={styles.title}>example-native-module demo</Text>
 
-        <Text style={styles.section}>Electron bridge</Text>
-        <Text>Electron detected: {String(isElectron)}</Text>
-        <Text style={styles.muted}>
-          Last deep link: {lastDeepLink ? String(lastDeepLink) : '(none)'}
-        </Text>
+        <Text style={styles.muted}>Platform: {Platform.OS}</Text>
+        <Text style={styles.muted}>Electron native addon detected (web/electron only): {String(hasElectronNativeImpl)}</Text>
 
-        <Text style={styles.muted}>
-          Theme: {themeInfo ? JSON.stringify(themeInfo) : '(unknown)'}
-        </Text>
-        <Text style={styles.muted}>
-          userData: {userDataPath ? String(userDataPath) : '(unknown)'}
-        </Text>
+        <Text style={styles.section}>Constants</Text>
+        <Text style={styles.mono}>PI: {pi == null ? '(unavailable)' : String(pi)}</Text>
 
-        <Text style={styles.section}>Dialogs</Text>
+        <Text style={styles.section}>hello()</Text>
         <View style={styles.row}>
-          <Pressable style={styles.button} onPress={openFileDialog}>
-            <Text style={styles.buttonText}>Open file</Text>
-          </Pressable>
-          <Pressable style={styles.button} onPress={saveFileDialog}>
-            <Text style={styles.buttonText}>Save file</Text>
+          <Pressable style={styles.button} onPress={runHello}>
+            <Text style={styles.buttonText}>Call hello()</Text>
           </Pressable>
         </View>
-        <Text style={styles.muted}>Selected file: {selectedFilePath ? String(selectedFilePath) : '(none)'}</Text>
+        <Text style={styles.mono}>{helloValue == null ? '(not called yet)' : helloValue}</Text>
+
+        <Text style={styles.section}>multiply(a, b)</Text>
         <View style={styles.row}>
-          <Pressable style={styles.button} onPress={showInFolder}>
-            <Text style={styles.buttonText}>Show in folder</Text>
+          <TextInput value={mulA} onChangeText={setMulA} style={styles.inputSmall} keyboardType="numeric" />
+          <TextInput value={mulB} onChangeText={setMulB} style={styles.inputSmall} keyboardType="numeric" />
+          <Pressable style={styles.button} onPress={runMultiply}>
+            <Text style={styles.buttonText}>Multiply</Text>
           </Pressable>
         </View>
-        {lastDialogJson ? <Text style={styles.mono}>{lastDialogJson}</Text> : null}
+        <Text style={styles.mono}>Result: {mulResult == null ? '(not called yet)' : mulResult}</Text>
 
-        <Text style={styles.section}>Clipboard</Text>
+        <Text style={styles.section}>setValueAsync(value) → emits onChange</Text>
         <TextInput
-          value={clipboardText}
-          onChangeText={setClipboardText}
+          value={setValueInput}
+          onChangeText={setSetValueInput}
           style={styles.input}
-          placeholder="Clipboard text"
+          placeholder="Value to send"
         />
         <View style={styles.row}>
-          <Pressable style={styles.button} onPress={readClipboard}>
-            <Text style={styles.buttonText}>Read</Text>
-          </Pressable>
-          <Pressable style={styles.button} onPress={writeClipboard}>
-            <Text style={styles.buttonText}>Write</Text>
+          <Pressable style={styles.button} onPress={runSetValueAsync}>
+            <Text style={styles.buttonText}>Call setValueAsync()</Text>
           </Pressable>
         </View>
+        <Text style={styles.muted}>Last onChange value: {lastChangeValue == null ? '(none)' : lastChangeValue}</Text>
 
-        <Text style={styles.section}>Shell</Text>
-        <View style={styles.row}>
-          <Pressable style={styles.button} onPress={openExternal}>
-            <Text style={styles.buttonText}>Open expo.dev</Text>
-          </Pressable>
+        <Text style={styles.section}>View</Text>
+        <Text style={styles.muted}>
+          Note: some sites block iframes via their own CSP/X-Frame-Options.
+        </Text>
+        <TextInput value={viewUrl} onChangeText={setViewUrl} style={styles.input} placeholder="URL (must allow framing on web/electron)" />
+        <Text style={styles.muted}>Last view onLoad: {viewLoadedUrl == null ? '(none)' : viewLoadedUrl}</Text>
+        <View style={styles.viewBox}>
+          <ExampleNativeModuleView
+            url={viewUrl}
+            onLoad={(e) => {
+              const url = e && e.nativeEvent && e.nativeEvent.url ? String(e.nativeEvent.url) : '(unknown)';
+              setViewLoadedUrl(url);
+              log('view onLoad: ' + url);
+            }}
+            style={styles.nativeView}
+          />
         </View>
-
-        <Text style={styles.section}>Power events</Text>
-        <Text style={styles.muted}>Latest: {powerEvents[0] ? JSON.stringify(powerEvents[0]) : '(none)'} </Text>
 
         <Text style={styles.section}>Log</Text>
         {logLines.length === 0 ? <Text style={styles.muted}>(empty)</Text> : null}
@@ -267,6 +192,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
+    alignItems: 'center',
   },
   button: {
     backgroundColor: '#111827',
@@ -284,6 +210,24 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 8,
+  },
+  inputSmall: {
+    minWidth: 72,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+  },
+  viewBox: {
+    height: 220,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  nativeView: {
+    flex: 1,
   },
   mono: {
     fontFamily: 'monospace',

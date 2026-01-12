@@ -7,11 +7,12 @@ import * as React from 'react';
 /** @param {ExampleNativeModuleViewProps} props */
 export default function ExampleNativeModuleView(props) {
   return (
-    <div>
-      <iframe
+    <div style={{ width: '100vw', height: '100vh', display: 'flex' }}>
+      <webview
         style={{ flex: 1 }}
         src={props.url}
-        onLoad={() => props.onLoad({ nativeEvent: { url: props.url } })}
+        // Use 'did-finish-load' instead of 'onLoad' for webview
+        onDidFinishLoad={() => props.onLoad({ nativeEvent: { url: props.url } })}
       />
     </div>
   );

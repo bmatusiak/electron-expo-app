@@ -26,14 +26,27 @@ function getElectronNativeImpl() {
 class ExampleNativeModule extends NativeModule {
     PI = Math.PI;
 
+    constructor() {
+        super();
+        const impl = getElectronNativeImpl();
+        if (impl && typeof impl.onChange === 'function') {
+            try {
+                impl.onChange((payload) => {
+                    if (payload && typeof payload.value !== 'undefined') {
+                        this.emit('onChange', { value: String(payload.value) });
+                    }
+                });
+            } catch (e) {
+                // ignore
+            }
+        }
+    }
+
     async setValueAsync(value) {
         const impl = getElectronNativeImpl();
         if (impl && typeof impl.setValueAsync === 'function') {
-            try {
-                await impl.setValueAsync(value);
-            } catch (e) {
-                // ignore and still emit to match web behavior
-            }
+            await impl.setValueAsync(value);
+            return;
         }
         this.emit('onChange', { value });
     }
