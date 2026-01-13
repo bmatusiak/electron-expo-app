@@ -1,8 +1,9 @@
 {
   "name": "electron-expo-app",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "electron-expo-app",
   "author": "Your Name",
+  "main": "index.js",
   "scripts": {
     "start": "expo start --dev-client",
     "android": "expo run:android",
@@ -13,7 +14,7 @@
     "electron:pack": "expo-electron package",
     "electron:make:win": "expo-electron package --make squirrel",
     "electron:make:linux": "expo-electron package --make deb",
-    "electron:make:mac": "expo-electron package --make darwin",
+    "electron:make:mac": "expo-electron package --make dmg",
     "electron:make:zip": "expo-electron package --make zip"
   },
   "dependencies": {
@@ -28,6 +29,7 @@
   },
   "private": true,
   "devDependencies": {
-    "@types/react": "~19.1.10"
+    "@types/react": "~19.1.10",
+    "electron": "39.2.7"
   }
 }
