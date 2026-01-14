@@ -139,7 +139,8 @@ export default function App() {
 
         <Text style={styles.section}>View</Text>
         <Text style={styles.muted}>
-          Note: some sites block iframes via their own CSP/X-Frame-Options.
+          Note: some sites block iframes via their own CSP/X-Frame-Options. Electron uses webview to load external
+          content.
         </Text>
         <TextInput value={viewUrl} onChangeText={setViewUrl} style={styles.input} placeholder="URL (must allow framing on web/electron)" />
         <Text style={styles.muted}>Last view onLoad: {viewLoadedUrl == null ? '(none)' : viewLoadedUrl}</Text>
