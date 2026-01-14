@@ -1,5 +1,5 @@
 import { registerWebModule, NativeModule } from 'expo';
-import { isElectron, requireNativeModule as requireElectronNativeModule } from 'expo-electron';
+import { isElectron, requireNativeModule } from 'expo-electron';
 
 /**
  * @typedef {import('./ExampleNativeModule.types').ChangeEventPayload} ChangeEventPayload
@@ -14,7 +14,7 @@ import { isElectron, requireNativeModule as requireElectronNativeModule } from '
 function getElectronNativeImpl() {
     try {
         if (typeof isElectron === 'function' && !isElectron()) return null;
-        return requireElectronNativeModule('example-native-module');
+        return requireNativeModule('example-native-module');
     } catch (e) {
         return null;
     }
