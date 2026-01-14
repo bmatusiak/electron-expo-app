@@ -1,4 +1,5 @@
 import { registerWebModule, NativeModule } from 'expo';
+import { isElectron, requireNativeModule as requireElectronNativeModule } from 'expo-electron';
 
 /**
  * @typedef {import('./ExampleNativeModule.types').ChangeEventPayload} ChangeEventPayload
@@ -12,12 +13,8 @@ import { registerWebModule, NativeModule } from 'expo';
 
 function getElectronNativeImpl() {
     try {
-        const root = (typeof globalThis !== 'undefined' && globalThis) ? globalThis : null;
-        const nativeRoot = root && root.ElectronNative;
-        if (!nativeRoot) return null;
-        const impl = nativeRoot['example-native-module'];
-        if (!impl || impl._missing) return null;
-        return impl;
+        if (typeof isElectron === 'function' && !isElectron()) return null;
+        return requireElectronNativeModule('example-native-module');
     } catch (e) {
         return null;
     }

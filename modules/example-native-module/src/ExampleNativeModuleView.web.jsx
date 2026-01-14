@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { isElectron } from 'expo-electron';
 
 /**
  * @typedef {import('./ExampleNativeModule.types').ExampleNativeModuleViewProps} ExampleNativeModuleViewProps
@@ -6,23 +7,15 @@ import * as React from 'react';
 
 /** @param {ExampleNativeModuleViewProps} props */
 export default function ExampleNativeModuleView(props) {
-  const isElectron = (() => {
+  const inElectron = (() => {
     try {
-      const w = typeof window !== 'undefined' ? window : undefined;
-      const ua = (typeof navigator !== 'undefined' && navigator.userAgent) ? navigator.userAgent : '';
-      return Boolean(
-        // Typical Electron renderer UA includes "Electron/xx"
-        (ua && ua.includes('Electron/')) ||
-        // expo-electron preload exposes these in the main world
-        (w && w.ElectronNative) ||
-        (w && w.electron)
-      );
+      return typeof isElectron === 'function' ? isElectron() : false;
     } catch (e) {
       return false;
     }
   })();
 
-  if (isElectron) {
+  if (inElectron) {
     try {
       const ElectronView = require('./ExampleNativeModuleView.electron').default;
       if (ElectronView) return <ElectronView {...props} />;

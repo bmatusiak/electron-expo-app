@@ -1,27 +1,16 @@
 import * as React from 'react';
+import { isElectron } from 'expo-electron';
 
 /**
  * @typedef {import('./ExampleNativeModule.types').ExampleNativeModuleViewProps} ExampleNativeModuleViewProps
  */
-
-function isElectronRenderer() {
-  try {
-    return Boolean(
-      typeof window !== 'undefined' &&
-        window.process &&
-        window.process.type === 'renderer'
-    );
-  } catch (e) {
-    return false;
-  }
-}
 
 /** @param {ExampleNativeModuleViewProps} props */
 export default function ExampleNativeModuleView(props) {
   const webviewRef = React.useRef(null);
 
   React.useEffect(() => {
-    if (!isElectronRenderer()) return;
+    if (typeof isElectron !== 'function' || !isElectron()) return;
 
     const el = webviewRef.current;
     if (!el || typeof el.addEventListener !== 'function') return;

@@ -30,16 +30,6 @@ export default function App() {
     }
   }, []);
 
-  const hasElectronNativeImpl = useMemo(() => {
-    try {
-      const root = (typeof globalThis !== 'undefined' && globalThis) ? globalThis : null;
-      const impl = root && root.ElectronNative && root.ElectronNative['example-native-module'];
-      return Boolean(impl && !impl._missing);
-    } catch (e) {
-      return false;
-    }
-  }, []);
-
   useEffect(() => {
     const addListener = ExampleNativeModule && ExampleNativeModule.addListener;
     if (typeof addListener !== 'function') {
@@ -100,8 +90,6 @@ export default function App() {
         <Text style={styles.title}>example-native-module demo</Text>
 
         <Text style={styles.muted}>Platform: {Platform.OS}</Text>
-        <Text style={styles.muted}>Electron native addon detected (web/electron only): {String(hasElectronNativeImpl)}</Text>
-
         <Text style={styles.section}>Constants</Text>
         <Text style={styles.mono}>PI: {pi == null ? '(unavailable)' : String(pi)}</Text>
 

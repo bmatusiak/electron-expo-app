@@ -19,6 +19,7 @@
     "electron:make:zip": "expo-electron package --make zip"
   },
   "dependencies": {
+    "@types/react": "~19.1.10",
     "example-native-module": "file:modules/example-native-module",
     "expo": "~54.0.30",
     "expo-electron": "file:modules/expo-electron",
